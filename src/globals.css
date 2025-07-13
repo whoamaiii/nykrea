@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background-color: #030712;
+  --sidebar-background: #111827;
+  --card-background: #1F2937;
+  --text-primary: #F9FAFB;
+  --text-secondary: #9CA3AF;
+  --accent-gradient-start: #8B5CF6;
+  --accent-gradient-end: #6D28D9;
+  --input-background: #374151;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-primary);
+  margin: 0;
+  padding: 0;
+}
+
+.emotion-icon {
+  @apply text-gray-400 flex flex-col items-center space-y-2 p-3 rounded-lg transition-all duration-200 cursor-pointer;
+}
+
+.emotion-icon:hover,
+.emotion-icon.selected {
+  background: linear-gradient(to right, var(--accent-gradient-start), var(--accent-gradient-end));
+  color: white;
+}
+
+.intensity-btn {
+  @apply flex-1 py-2 rounded-md border border-gray-600 text-[var(--text-secondary)] font-medium text-sm transition-all duration-200 cursor-pointer;
+}
+
+.intensity-btn:hover,
+.intensity-btn.selected {
+  background: linear-gradient(to right, var(--accent-gradient-start), var(--accent-gradient-end));
+  color: white;
+  border-color: transparent;
+}
