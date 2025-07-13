@@ -53,13 +53,12 @@ function LogTimeline({ logs }) {
                 {getIcon(log)}
                 <div className="flex-1">
                   <p className="text-sm text-white font-medium">
-                    {log.type === 'feeling' ? `Feeling: ${log.value}` : `Sensory: ${log.value}`}
+                    {log.type === 'feeling' 
+                      ? `Feeling: ${log.value}` 
+                      : `Sensory: ${log.category} - ${log.intensity}`}
                   </p>
-                  {log.sensory && (
-                    <p className="text-xs text-[var(--text-secondary)]">Sensory: {log.sensory}</p>
-                  )}
-                  {log.description && (
-                    <p className="text-xs text-[var(--text-secondary)]">{log.description}</p>
+                  {log.notes && (
+                    <p className="text-xs text-[var(--text-secondary)]">{log.notes}</p>
                   )}
                 </div>
                 <span className="text-xs text-[var(--text-secondary)] ml-auto whitespace-nowrap">

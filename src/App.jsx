@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Sidebar from './components/Sidebar'
 import MainContent from './components/MainContent'
 
@@ -69,6 +69,11 @@ function App() {
   ])
 
   const [selectedStudentId, setSelectedStudentId] = useState(1)
+
+  // State tracking for debugging and verification
+  useEffect(() => {
+    console.log("STATE UPDATED:", students);
+  }, [students]);
 
   // Master function to add logs
   const handleAddLog = (newLog) => {

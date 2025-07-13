@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 
 function StudentLoggingView({ onAddLog }) {
-  const [selectedIntensities, setSelectedIntensities] = useState({
-    visual: 'Medium',
-    auditory: 'Low',
-    tactile: ''
+  const [sensoryInputs, setSensoryInputs] = useState({
+    Visual: { intensity: null, notes: '' },
+    Auditory: { intensity: null, notes: '' },
+    Tactile: { intensity: null, notes: '' }
   })
 
   const handleFeelingClick = (feeling) => {
@@ -21,10 +21,51 @@ function StudentLoggingView({ onAddLog }) {
     onAddLog(newLog)
   }
 
-  const handleIntensityClick = (sensory, level) => {
-    setSelectedIntensities({
-      ...selectedIntensities,
-      [sensory]: level
+  const handleIntensityChange = (category, intensity) => {
+    setSensoryInputs({
+      ...sensoryInputs,
+      [category]: {
+        ...sensoryInputs[category],
+        intensity: intensity
+      }
+    })
+  }
+
+  const handleLogSensory = (category) => {
+    if (!sensoryInputs[category].intensity) return;
+    
+    const newLog = {
+      id: Date.now(),
+      type: 'sensory',
+      category: category,
+      intensity: sensoryInputs[category].intensity,
+      notes: sensoryInputs[category].notes,
+      timestamp: new Date().toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit', 
+        hour12: true 
+      })
+    }
+    
+    onAddLog(newLog)
+    
+    // Reset the intensity and notes for this category
+    setSensoryInputs({
+      ...sensoryInputs,
+      [category]: {
+        intensity: null,
+        notes: ''
+      }
+    })
+  }
+
+  const handleNotesChange = (category, notes) => {
+    setSensoryInputs({
+      ...sensoryInputs,
+      [category]: {
+        ...sensoryInputs[category],
+        notes: notes
+      }
     })
   }
 
@@ -84,20 +125,20 @@ function StudentLoggingView({ onAddLog }) {
               <h4 className="font-semibold text-white mb-2">Visual</h4>
               <div className="flex items-center gap-4">
                 <button 
-                  onClick={() => handleIntensityClick('visual', 'Low')}
-                  className={`intensity-btn ${selectedIntensities.visual === 'Low' ? 'selected' : ''}`}
+                  onClick={() => handleIntensityChange('Visual', 'Low')}
+                  className={`intensity-btn ${sensoryInputs.Visual.intensity === 'Low' ? 'selected' : ''}`}
                 >
                   Low
                 </button>
                 <button 
-                  onClick={() => handleIntensityClick('visual', 'Medium')}
-                  className={`intensity-btn ${selectedIntensities.visual === 'Medium' ? 'selected' : ''}`}
+                  onClick={() => handleIntensityChange('Visual', 'Medium')}
+                  className={`intensity-btn ${sensoryInputs.Visual.intensity === 'Medium' ? 'selected' : ''}`}
                 >
                   Medium
                 </button>
                 <button 
-                  onClick={() => handleIntensityClick('visual', 'High')}
-                  className={`intensity-btn ${selectedIntensities.visual === 'High' ? 'selected' : ''}`}
+                  onClick={() => handleIntensityChange('Visual', 'High')}
+                  className={`intensity-btn ${sensoryInputs.Visual.intensity === 'High' ? 'selected' : ''}`}
                 >
                   High
                 </button>
@@ -105,27 +146,36 @@ function StudentLoggingView({ onAddLog }) {
                   className="flex-[2] bg-[var(--input-background)] border border-gray-600 rounded-md px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[var(--accent-gradient-start)]" 
                   placeholder="Brief description..." 
                   type="text"
+                  value={sensoryInputs.Visual.notes}
+                  onChange={(e) => handleNotesChange('Visual', e.target.value)}
                 />
+                <button
+                  onClick={() => handleLogSensory('Visual')}
+                  disabled={!sensoryInputs.Visual.intensity}
+                  className="px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-[var(--accent-gradient-start)] to-[var(--accent-gradient-end)] text-white hover:opacity-90"
+                >
+                  Log
+                </button>
               </div>
             </div>
             <div className="p-4 bg-gray-900/70 rounded-lg">
               <h4 className="font-semibold text-white mb-2">Auditory</h4>
               <div className="flex items-center gap-4">
                 <button 
-                  onClick={() => handleIntensityClick('auditory', 'Low')}
-                  className={`intensity-btn ${selectedIntensities.auditory === 'Low' ? 'selected' : ''}`}
+                  onClick={() => handleIntensityChange('Auditory', 'Low')}
+                  className={`intensity-btn ${sensoryInputs.Auditory.intensity === 'Low' ? 'selected' : ''}`}
                 >
                   Low
                 </button>
                 <button 
-                  onClick={() => handleIntensityClick('auditory', 'Medium')}
-                  className={`intensity-btn ${selectedIntensities.auditory === 'Medium' ? 'selected' : ''}`}
+                  onClick={() => handleIntensityChange('Auditory', 'Medium')}
+                  className={`intensity-btn ${sensoryInputs.Auditory.intensity === 'Medium' ? 'selected' : ''}`}
                 >
                   Medium
                 </button>
                 <button 
-                  onClick={() => handleIntensityClick('auditory', 'High')}
-                  className={`intensity-btn ${selectedIntensities.auditory === 'High' ? 'selected' : ''}`}
+                  onClick={() => handleIntensityChange('Auditory', 'High')}
+                  className={`intensity-btn ${sensoryInputs.Auditory.intensity === 'High' ? 'selected' : ''}`}
                 >
                   High
                 </button>
@@ -133,27 +183,36 @@ function StudentLoggingView({ onAddLog }) {
                   className="flex-[2] bg-[var(--input-background)] border border-gray-600 rounded-md px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[var(--accent-gradient-start)]" 
                   placeholder="Brief description..." 
                   type="text"
+                  value={sensoryInputs.Auditory.notes}
+                  onChange={(e) => handleNotesChange('Auditory', e.target.value)}
                 />
+                <button
+                  onClick={() => handleLogSensory('Auditory')}
+                  disabled={!sensoryInputs.Auditory.intensity}
+                  className="px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-[var(--accent-gradient-start)] to-[var(--accent-gradient-end)] text-white hover:opacity-90"
+                >
+                  Log
+                </button>
               </div>
             </div>
             <div className="p-4 bg-gray-900/70 rounded-lg">
               <h4 className="font-semibold text-white mb-2">Tactile</h4>
               <div className="flex items-center gap-4">
                 <button 
-                  onClick={() => handleIntensityClick('tactile', 'Low')}
-                  className={`intensity-btn ${selectedIntensities.tactile === 'Low' ? 'selected' : ''}`}
+                  onClick={() => handleIntensityChange('Tactile', 'Low')}
+                  className={`intensity-btn ${sensoryInputs.Tactile.intensity === 'Low' ? 'selected' : ''}`}
                 >
                   Low
                 </button>
                 <button 
-                  onClick={() => handleIntensityClick('tactile', 'Medium')}
-                  className={`intensity-btn ${selectedIntensities.tactile === 'Medium' ? 'selected' : ''}`}
+                  onClick={() => handleIntensityChange('Tactile', 'Medium')}
+                  className={`intensity-btn ${sensoryInputs.Tactile.intensity === 'Medium' ? 'selected' : ''}`}
                 >
                   Medium
                 </button>
                 <button 
-                  onClick={() => handleIntensityClick('tactile', 'High')}
-                  className={`intensity-btn ${selectedIntensities.tactile === 'High' ? 'selected' : ''}`}
+                  onClick={() => handleIntensityChange('Tactile', 'High')}
+                  className={`intensity-btn ${sensoryInputs.Tactile.intensity === 'High' ? 'selected' : ''}`}
                 >
                   High
                 </button>
@@ -161,7 +220,16 @@ function StudentLoggingView({ onAddLog }) {
                   className="flex-[2] bg-[var(--input-background)] border border-gray-600 rounded-md px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[var(--accent-gradient-start)]" 
                   placeholder="Brief description..." 
                   type="text"
+                  value={sensoryInputs.Tactile.notes}
+                  onChange={(e) => handleNotesChange('Tactile', e.target.value)}
                 />
+                <button
+                  onClick={() => handleLogSensory('Tactile')}
+                  disabled={!sensoryInputs.Tactile.intensity}
+                  className="px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-[var(--accent-gradient-start)] to-[var(--accent-gradient-end)] text-white hover:opacity-90"
+                >
+                  Log
+                </button>
               </div>
             </div>
           </div>
