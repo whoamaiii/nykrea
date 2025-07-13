@@ -6,6 +6,11 @@ function LogTimeline({ logs, onDeleteLog, onEditLog }) {
 
   // Format timestamp to show full date and time
   const formatTimestamp = (timestamp) => {
+    // If timestamp is already a formatted string (like "10:30 AM", "Yesterday"), return it as is
+    if (typeof timestamp === 'string' && !timestamp.match(/^\d+$/)) {
+      return timestamp
+    }
+    
     const date = new Date(timestamp)
     const now = new Date()
     const diffTime = Math.abs(now - date)
@@ -186,7 +191,7 @@ function LogTimeline({ logs, onDeleteLog, onEditLog }) {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-[var(--text-secondary)] whitespace-nowrap">
-                        {formatTimestamp(log.id)}
+                        {formatTimestamp(log.timestamp)}
                       </span>
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                         <button

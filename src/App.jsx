@@ -2,6 +2,12 @@ import React, { useState, useEffect } from 'react'
 import Sidebar from './components/Sidebar'
 import MainContent from './components/MainContent'
 
+// Generate unique IDs to prevent collisions
+let idCounter = Date.now()
+const generateUniqueId = () => {
+  return ++idCounter
+}
+
 // Initial demo data
 const initialStudents = [
   {
@@ -9,38 +15,38 @@ const initialStudents = [
     name: 'Liam Carter',
     logs: [
       {
-        id: 1720862400000,
+        id: generateUniqueId(),
         type: 'feeling',
         value: 'Happy',
         sensory: 'Auditory - Medium',
         timestamp: '10:30 AM'
       },
       {
-        id: 1720858500000,
+        id: generateUniqueId(),
         type: 'sensory',
         value: 'Visual - Low',
-        description: 'Dimmed the lights',
+        notes: 'Dimmed the lights',
         timestamp: '09:15 AM'
       },
       {
-        id: 1720776000000,
+        id: generateUniqueId(),
         type: 'feeling',
         value: 'Anxious',
-        description: 'Loud noise from outside',
+        notes: 'Loud noise from outside',
         timestamp: 'Yesterday'
       },
       {
-        id: 1720775000000,
+        id: generateUniqueId(),
         type: 'sensory',
         value: 'Tactile - High',
-        description: 'Used weighted blanket',
+        notes: 'Used weighted blanket',
         timestamp: 'Yesterday'
       },
       {
-        id: 1720689600000,
+        id: generateUniqueId(),
         type: 'feeling',
         value: 'Sad',
-        description: 'Missed a friend',
+        notes: 'Missed a friend',
         timestamp: '2 days ago'
       }
     ]
@@ -97,7 +103,7 @@ function App() {
         if (student.id === selectedStudentId) {
           return {
             ...student,
-            logs: [newLog, ...student.logs]
+            logs: [{...newLog, id: generateUniqueId()}, ...student.logs]
           }
         }
         return student
@@ -143,7 +149,7 @@ function App() {
   // Function to add new student
   const handleAddStudent = (name) => {
     const newStudent = {
-      id: Date.now(),
+      id: generateUniqueId(),
       name: name,
       logs: []
     }

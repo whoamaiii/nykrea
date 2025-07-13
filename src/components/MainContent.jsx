@@ -26,9 +26,9 @@ Student: ${student.name}
 Log Data:
 ${student.logs.map(log => {
   if (log.type === 'feeling') {
-    return `- ${log.timestamp}: Feeling - ${log.value}${log.notes ? `, Notes: ${log.notes}` : ''}${log.description ? `, Description: ${log.description}` : ''}`
+    return `- ${log.timestamp}: Feeling - ${log.value}${log.notes ? `, Notes: ${log.notes}` : ''}`
   } else if (log.type === 'sensory') {
-    return `- ${log.timestamp}: Sensory - ${log.category || log.value}${log.intensity ? ` (Intensity: ${log.intensity})` : ''}${log.notes ? `, Notes: ${log.notes}` : ''}${log.description ? `, Description: ${log.description}` : ''}`
+    return `- ${log.timestamp}: Sensory - ${log.category || log.value}${log.intensity ? ` (Intensity: ${log.intensity})` : ''}${log.notes ? `, Notes: ${log.notes}` : ''}`
   }
   return `- ${log.timestamp}: ${log.type} - ${log.value}`
 }).join('\n')}

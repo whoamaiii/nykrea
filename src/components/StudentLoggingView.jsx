@@ -9,7 +9,6 @@ function StudentLoggingView({ onAddLog }) {
 
   const handleFeelingClick = (feeling) => {
     const newLog = {
-      id: Date.now(),
       type: 'feeling',
       value: feeling,
       timestamp: new Date().toLocaleTimeString('en-US', { 
@@ -35,7 +34,6 @@ function StudentLoggingView({ onAddLog }) {
     if (!sensoryInputs[category].intensity) return;
     
     const newLog = {
-      id: Date.now(),
       type: 'sensory',
       category: category,
       intensity: sensoryInputs[category].intensity,
