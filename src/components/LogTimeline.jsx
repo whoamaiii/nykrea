@@ -5,7 +5,9 @@ function LogTimeline({ logs, onDeleteLog, onEditLog }) {
   const [editFormData, setEditFormData] = useState({})
 
   // Format timestamp to show full date and time
-  const formatTimestamp = (timestamp) => {
+  const formatTimestamp = (log) => {
+    // Use the timestamp field if available, otherwise fall back to id
+    const timestamp = log.timestamp || log.id
     const date = new Date(timestamp)
     const now = new Date()
     const diffTime = Math.abs(now - date)
@@ -186,7 +188,7 @@ function LogTimeline({ logs, onDeleteLog, onEditLog }) {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-[var(--text-secondary)] whitespace-nowrap">
-                        {formatTimestamp(log.id)}
+                        {formatTimestamp(log)}
                       </span>
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                         <button

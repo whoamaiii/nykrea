@@ -88,6 +88,11 @@ function App() {
   useEffect(() => {
     console.log("STATE UPDATED:", students);
     localStorage.setItem('kre-students', JSON.stringify(students))
+    
+    // Cleanup function to prevent memory leaks
+    return () => {
+      // Cleanup if needed in the future
+    }
   }, [students]);
 
   // Master function to add logs

@@ -80,7 +80,7 @@ function StudentLoggingView({ onAddLog }) {
           <div className="flex justify-around items-center p-4 bg-gray-900/70 rounded-lg">
             <button 
               onClick={() => handleFeelingClick('Happy')}
-              className="emotion-icon"
+              className="emotion-icon hover:bg-gradient-to-r hover:from-[var(--accent-gradient-start)] hover:to-[var(--accent-gradient-end)] hover:text-white"
             >
               <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                 <path clipRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a.5.5 0 01.707 0 6 6 0 01-7.071 0 .5.5 0 01.707-.707 5 5 0 005.657 0 .5.5 0 01.707.707z" fillRule="evenodd"></path>
@@ -89,7 +89,7 @@ function StudentLoggingView({ onAddLog }) {
             </button>
             <button 
               onClick={() => handleFeelingClick('Sad')}
-              className="emotion-icon"
+              className="emotion-icon hover:bg-gradient-to-r hover:from-[var(--accent-gradient-start)] hover:to-[var(--accent-gradient-end)] hover:text-white"
             >
               <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                 <path clipRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-7.843 6.472a.5.5 0 00.638.76 6.002 6.002 0 006.41 0 .5.5 0 00.638-.761 5.002 5.002 0 01-7.686 0z" fillRule="evenodd"></path>
@@ -98,7 +98,7 @@ function StudentLoggingView({ onAddLog }) {
             </button>
             <button 
               onClick={() => handleFeelingClick('Angry')}
-              className="emotion-icon"
+              className="emotion-icon hover:bg-gradient-to-r hover:from-[var(--accent-gradient-start)] hover:to-[var(--accent-gradient-end)] hover:text-white"
             >
               <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                 <path clipRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM5.5 8a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm9 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM10 14a4 4 0 00-4 4h8a4 4 0 00-4-4z" fillRule="evenodd"></path>
@@ -107,7 +107,7 @@ function StudentLoggingView({ onAddLog }) {
             </button>
             <button 
               onClick={() => handleFeelingClick('Anxious')}
-              className="emotion-icon"
+              className="emotion-icon hover:bg-gradient-to-r hover:from-[var(--accent-gradient-start)] hover:to-[var(--accent-gradient-end)] hover:text-white"
             >
               <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                 <path clipRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-5 4a1 1 0 011-1h2a1 1 0 110 2H10a1 1 0 01-1-1z" fillRule="evenodd"></path>
