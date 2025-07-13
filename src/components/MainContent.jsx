@@ -3,6 +3,7 @@ import StudentLoggingView from './StudentLoggingView'
 import LogTimeline from './LogTimeline'
 import RecentActivity from './RecentActivity'
 import InsightsModal from './InsightsModal'
+import Analytics from './Analytics'
 
 function MainContent({ student, onAddLog, onDeleteLog, onEditLog }) {
   // State management for AI Insights Modal
@@ -10,6 +11,9 @@ function MainContent({ student, onAddLog, onDeleteLog, onEditLog }) {
   const [isLoading, setIsLoading] = useState(false)
   const [aiResponse, setAiResponse] = useState('')
   const [error, setError] = useState(null)
+  
+  // Tab state for switching between logging and analytics
+  const [activeTab, setActiveTab] = useState('logging')
 
   // Handler function for AI insights
   const handleGetInsights = async () => {
@@ -115,31 +119,72 @@ Keep your response concise and practical for a busy teacher.`
         </p>
       </header>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <StudentLoggingView onAddLog={onAddLog} />
-        </div>
-        <div>
-          <LogTimeline 
-            logs={student.logs} 
-            onDeleteLog={onDeleteLog}
-            onEditLog={onEditLog}
-          />
-        </div>
-      </div>
-      
-      <RecentActivity logs={student.logs} />
-      
-      <div className="mt-8">
-        <button 
-          onClick={handleGetInsights}
-          className="w-full text-lg font-bold text-white py-4 px-6 rounded-lg bg-gradient-to-r from-[var(--accent-gradient-start)] to-[var(--accent-gradient-end)] hover:from-[var(--accent-gradient-start)]/90 hover:to-[var(--accent-gradient-end)]/90 transition-all duration-300 shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-400/50">
-          Get Gemini AI Insights
+      {/* Tab Navigation */}
+      <div className="flex border-b border-gray-700 mb-8">
+        <button
+          onClick={() => setActiveTab('logging')}
+          className={`px-6 py-3 font-medium transition-colors ${
+            activeTab === 'logging'
+              ? 'text-white border-b-2 border-[var(--accent-gradient-start)]'
+              : 'text-[var(--text-secondary)] hover:text-white'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Logging
+          </div>
+        </button>
+        <button
+          onClick={() => setActiveTab('analytics')}
+          className={`px-6 py-3 font-medium transition-colors ${
+            activeTab === 'analytics'
+              ? 'text-white border-b-2 border-[var(--accent-gradient-start)]'
+              : 'text-[var(--text-secondary)] hover:text-white'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Analytics
+          </div>
         </button>
       </div>
+      
+      {/* Tab Content */}
+      {activeTab === 'logging' ? (
+        <>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <StudentLoggingView onAddLog={onAddLog} />
+            </div>
+            <div>
+              <LogTimeline
+                logs={student.logs}
+                onDeleteLog={onDeleteLog}
+                onEditLog={onEditLog}
+              />
+            </div>
+          </div>
+          
+          <RecentActivity logs={student.logs} />
+          
+          <div className="mt-8">
+            <button
+              onClick={handleGetInsights}
+              className="w-full text-lg font-bold text-white py-4 px-6 rounded-lg bg-gradient-to-r from-[var(--accent-gradient-start)] to-[var(--accent-gradient-end)] hover:from-[var(--accent-gradient-start)]/90 hover:to-[var(--accent-gradient-end)]/90 transition-all duration-300 shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-400/50">
+              Get Gemini AI Insights
+            </button>
+          </div>
+        </>
+      ) : (
+        <Analytics logs={student.logs} studentName={student.name} />
+      )}
 
       {/* AI Insights Modal */}
-      <InsightsModal 
+      <InsightsModal
         isOpen={isModalOpen}
         isLoading={isLoading}
         response={aiResponse}
