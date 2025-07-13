@@ -1,6 +1,64 @@
-import React from 'react'
+import React, { useState } from 'react'
 
-function LogTimeline({ logs }) {
+function LogTimeline({ logs, onDeleteLog, onEditLog }) {
+  const [editingLogId, setEditingLogId] = useState(null)
+  const [editFormData, setEditFormData] = useState({})
+
+  // Format timestamp to show full date and time
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp)
+    const now = new Date()
+    const diffTime = Math.abs(now - date)
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+    
+    const timeStr = date.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    })
+    
+    if (diffDays === 0) {
+      return `Today at ${timeStr}`
+    } else if (diffDays === 1) {
+      return `Yesterday at ${timeStr}`
+    } else if (diffDays < 7) {
+      return `${diffDays} days ago at ${timeStr}`
+    } else {
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric',
+        year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+      }) + ` at ${timeStr}`
+    }
+  }
+
+  const handleEditClick = (log) => {
+    setEditingLogId(log.id)
+    setEditFormData({
+      value: log.value,
+      notes: log.notes || log.description || '',
+      category: log.category || '',
+      intensity: log.intensity || ''
+    })
+  }
+
+  const handleSaveEdit = (logId) => {
+    onEditLog(logId, editFormData)
+    setEditingLogId(null)
+    setEditFormData({})
+  }
+
+  const handleCancelEdit = () => {
+    setEditingLogId(null)
+    setEditFormData({})
+  }
+
+  const handleDelete = (logId) => {
+    if (window.confirm('Are you sure you want to delete this log?')) {
+      onDeleteLog(logId)
+    }
+  }
+
   const getIcon = (log) => {
     if (log.type === 'feeling') {
       switch (log.value) {
@@ -49,22 +107,111 @@ function LogTimeline({ logs }) {
         ) : (
           logs.map((log, index) => (
             <div key={log.id} className={`py-4 ${index < logs.length - 1 ? 'border-b border-gray-700' : ''}`}>
-              <div className="flex items-center gap-3">
-                {getIcon(log)}
-                <div className="flex-1">
-                  <p className="text-sm text-white font-medium">
-                    {log.type === 'feeling' 
-                      ? `Feeling: ${log.value}` 
-                      : `Sensory: ${log.category} - ${log.intensity}`}
-                  </p>
-                  {log.notes && (
-                    <p className="text-xs text-[var(--text-secondary)]">{log.notes}</p>
+              {editingLogId === log.id ? (
+                // Edit mode
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    {getIcon(log)}
+                    <span className="text-sm text-gray-400">
+                      {log.type === 'feeling' ? 'Feeling' : 'Sensory'}
+                    </span>
+                  </div>
+                  {log.type === 'feeling' ? (
+                    <select 
+                      value={editFormData.value} 
+                      onChange={(e) => setEditFormData({...editFormData, value: e.target.value})}
+                      className="w-full bg-gray-700 text-white rounded px-3 py-2 text-sm"
+                    >
+                      <option value="Happy">Happy</option>
+                      <option value="Sad">Sad</option>
+                      <option value="Angry">Angry</option>
+                      <option value="Anxious">Anxious</option>
+                    </select>
+                  ) : (
+                    <>
+                      <input 
+                        type="text"
+                        value={editFormData.category}
+                        onChange={(e) => setEditFormData({...editFormData, category: e.target.value})}
+                        placeholder="Category"
+                        className="w-full bg-gray-700 text-white rounded px-3 py-2 text-sm"
+                      />
+                      <input 
+                        type="text"
+                        value={editFormData.intensity}
+                        onChange={(e) => setEditFormData({...editFormData, intensity: e.target.value})}
+                        placeholder="Intensity"
+                        className="w-full bg-gray-700 text-white rounded px-3 py-2 text-sm"
+                      />
+                    </>
                   )}
+                  <textarea
+                    value={editFormData.notes}
+                    onChange={(e) => setEditFormData({...editFormData, notes: e.target.value})}
+                    placeholder="Notes (optional)"
+                    className="w-full bg-gray-700 text-white rounded px-3 py-2 text-sm resize-none"
+                    rows="2"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleSaveEdit(log.id)}
+                      className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-sm transition-colors"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={handleCancelEdit}
+                      className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
-                <span className="text-xs text-[var(--text-secondary)] ml-auto whitespace-nowrap">
-                  {log.timestamp}
-                </span>
-              </div>
+              ) : (
+                // Display mode
+                <div className="group">
+                  <div className="flex items-start gap-3">
+                    {getIcon(log)}
+                    <div className="flex-1">
+                      <p className="text-sm text-white font-medium">
+                        {log.type === 'feeling' 
+                          ? `Feeling: ${log.value}` 
+                          : `Sensory: ${log.category || log.value}${log.intensity ? ` - ${log.intensity}` : ''}`}
+                      </p>
+                      {(log.notes || log.description) && (
+                        <p className="text-xs text-[var(--text-secondary)] mt-1">
+                          {log.notes || log.description}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-[var(--text-secondary)] whitespace-nowrap">
+                        {formatTimestamp(log.id)}
+                      </span>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                        <button
+                          onClick={() => handleEditClick(log)}
+                          className="p-1 hover:bg-gray-700 rounded transition-colors"
+                          title="Edit log"
+                        >
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleDelete(log.id)}
+                          className="p-1 hover:bg-gray-700 rounded transition-colors"
+                          title="Delete log"
+                        >
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ))
         )}

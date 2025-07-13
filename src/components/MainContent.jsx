@@ -4,7 +4,7 @@ import LogTimeline from './LogTimeline'
 import RecentActivity from './RecentActivity'
 import InsightsModal from './InsightsModal'
 
-function MainContent({ student, onAddLog }) {
+function MainContent({ student, onAddLog, onDeleteLog, onEditLog }) {
   // State management for AI Insights Modal
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -120,7 +120,11 @@ Keep your response concise and practical for a busy teacher.`
           <StudentLoggingView onAddLog={onAddLog} />
         </div>
         <div>
-          <LogTimeline logs={student.logs} />
+          <LogTimeline 
+            logs={student.logs} 
+            onDeleteLog={onDeleteLog}
+            onEditLog={onEditLog}
+          />
         </div>
       </div>
       
