@@ -45,11 +45,11 @@ Please provide:
 Keep your response concise and practical for a busy teacher.`
 
     try {
-      // WARNING: API key is hardcoded for POC only - DO NOT USE IN PRODUCTION
-      const API_KEY = 'AIzaSyCHlUphzuYLfs4TXJpftQuTDH1aBQ17rDA' // Replace with your actual API key
+      // Use environment variable for API key - more secure approach
+      const API_KEY = import.meta.env.VITE_GEMINI_API_KEY
       
-      if (API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
-        throw new Error('Please add your Gemini API key in MainContent.jsx (line 45). Get your API key from https://makersuite.google.com/app/apikey')
+      if (!API_KEY) {
+        throw new Error('Gemini API key not found. Please set VITE_GEMINI_API_KEY environment variable. Get your API key from https://makersuite.google.com/app/apikey')
       }
 
       // Check if there are any logs to analyze

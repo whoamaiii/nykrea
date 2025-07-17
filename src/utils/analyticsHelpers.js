@@ -2,8 +2,12 @@ import { startOfDay, startOfWeek, startOfMonth, format, subDays, eachDayOfInterv
 
 // Mood distribution for pie chart
 export const getMoodDistribution = (logs) => {
+  if (!logs || !Array.isArray(logs)) {
+    return []
+  }
+  
   const moodCounts = logs
-    .filter(log => log.type === 'feeling')
+    .filter(log => log && log.type === 'feeling' && log.value)
     .reduce((acc, log) => {
       acc[log.value] = (acc[log.value] || 0) + 1
       return acc
@@ -20,6 +24,10 @@ export const getMoodDistribution = (logs) => {
 
 // Mood trends over time for line chart
 export const getMoodTrends = (logs, days = 7) => {
+  if (!logs || !Array.isArray(logs)) {
+    return []
+  }
+  
   const endDate = new Date()
   const startDate = subDays(endDate, days - 1)
   const dates = eachDayOfInterval({ start: startDate, end: endDate })
@@ -29,12 +37,20 @@ export const getMoodTrends = (logs, days = 7) => {
     const dayEnd = endOfDay(date)
     
     const dayLogs = logs.filter(log => {
-      const logDate = new Date(log.id)
-      return log.type === 'feeling' && logDate >= dayStart && logDate <= dayEnd
+      if (!log || !log.id || log.type !== 'feeling') return false
+      try {
+        const logDate = new Date(log.id)
+        return !isNaN(logDate.getTime()) && logDate >= dayStart && logDate <= dayEnd
+      } catch (error) {
+        console.error('Invalid log date:', log.id)
+        return false
+      }
     })
     
     const moodCounts = dayLogs.reduce((acc, log) => {
-      acc[log.value] = (acc[log.value] || 0) + 1
+      if (log.value) {
+        acc[log.value] = (acc[log.value] || 0) + 1
+      }
       return acc
     }, {})
     
@@ -51,17 +67,28 @@ export const getMoodTrends = (logs, days = 7) => {
 
 // Time of day analysis
 export const getTimeOfDayAnalysis = (logs) => {
+  if (!logs || !Array.isArray(logs)) {
+    return []
+  }
+  
   const hours = Array.from({ length: 24 }, (_, i) => i)
   
   const moodsByHour = hours.map(hour => {
     const hourLogs = logs.filter(log => {
-      if (log.type !== 'feeling') return false
-      const logDate = new Date(log.id)
-      return logDate.getHours() === hour
+      if (!log || !log.id || log.type !== 'feeling') return false
+      try {
+        const logDate = new Date(log.id)
+        return !isNaN(logDate.getTime()) && logDate.getHours() === hour
+      } catch (error) {
+        console.error('Invalid log date:', log.id)
+        return false
+      }
     })
     
     const moodCounts = hourLogs.reduce((acc, log) => {
-      acc[log.value] = (acc[log.value] || 0) + 1
+      if (log.value) {
+        acc[log.value] = (acc[log.value] || 0) + 1
+      }
       return acc
     }, {})
     
@@ -78,6 +105,10 @@ export const getTimeOfDayAnalysis = (logs) => {
 
 // Sensory intensity data for heatmap
 export const getSensoryIntensityData = (logs, days = 7) => {
+  if (!logs || !Array.isArray(logs)) {
+    return []
+  }
+  
   const endDate = new Date()
   const startDate = subDays(endDate, days - 1)
   const dates = eachDayOfInterval({ start: startDate, end: endDate })
@@ -93,11 +124,17 @@ export const getSensoryIntensityData = (logs, days = 7) => {
     
     sensoryCategories.forEach(category => {
       const dayLogs = logs.filter(log => {
-        const logDate = new Date(log.id)
-        return log.type === 'sensory' && 
-               log.category === category && 
-               logDate >= dayStart && 
-               logDate <= dayEnd
+        if (!log || !log.id || log.type !== 'sensory' || !log.category) return false
+        try {
+          const logDate = new Date(log.id)
+          return !isNaN(logDate.getTime()) && 
+                 log.category === category && 
+                 logDate >= dayStart && 
+                 logDate <= dayEnd
+        } catch (error) {
+          console.error('Invalid log date:', log.id)
+          return false
+        }
       })
       
       const avgIntensity = dayLogs.length > 0
@@ -118,6 +155,10 @@ export const getSensoryIntensityData = (logs, days = 7) => {
 
 // Correlation analysis between sensory and mood
 export const getSensoryMoodCorrelation = (logs) => {
+  if (!logs || !Array.isArray(logs)) {
+    return []
+  }
+  
   const correlations = []
   const sensoryCategories = ['Visual', 'Auditory', 'Tactile']
   const moods = ['Happy', 'Sad', 'Angry', 'Anxious']
@@ -128,21 +169,38 @@ export const getSensoryMoodCorrelation = (logs) => {
       let correlationCount = 0
       
       logs.forEach((log, index) => {
+        if (!log || !log.id || !log.type || !log.category) return
+        
         if (log.type === 'sensory' && log.category === category) {
-          // Look for mood logs within next 2 hours
-          const logTime = new Date(log.id)
-          const twoHoursLater = new Date(logTime.getTime() + 2 * 60 * 60 * 1000)
-          
-          for (let i = index + 1; i < logs.length; i++) {
-            const nextLog = logs[i]
-            const nextLogTime = new Date(nextLog.id)
+          try {
+            // Look for mood logs within next 2 hours
+            const logTime = new Date(log.id)
+            if (isNaN(logTime.getTime())) return
             
-            if (nextLogTime > twoHoursLater) break
+            const twoHoursLater = new Date(logTime.getTime() + 2 * 60 * 60 * 1000)
             
-            if (nextLog.type === 'feeling' && nextLog.value === mood) {
-              correlationCount++
-              break
+            for (let i = index + 1; i < logs.length; i++) {
+              const nextLog = logs[i]
+              if (!nextLog || !nextLog.id || !nextLog.type) continue
+              
+              try {
+                const nextLogTime = new Date(nextLog.id)
+                if (isNaN(nextLogTime.getTime())) continue
+                
+                if (nextLogTime > twoHoursLater) break
+                
+                if (nextLog.type === 'feeling' && nextLog.value === mood) {
+                  correlationCount++
+                  break
+                }
+              } catch (error) {
+                console.error('Error processing next log:', error)
+                continue
+              }
             }
+          } catch (error) {
+            console.error('Error processing log time:', error)
+            return
           }
         }
       })
@@ -160,19 +218,51 @@ export const getSensoryMoodCorrelation = (logs) => {
 
 // Quick stats for dashboard
 export const getQuickStats = (logs) => {
+  if (!logs || !Array.isArray(logs)) {
+    return {
+      todayTotal: 0,
+      todayMoodCount: 0,
+      todaySensoryCount: 0,
+      mostCommonMoodToday: 'None',
+      weekTotal: 0,
+      weekMoodBreakdown: {}
+    }
+  }
+  
   const today = new Date()
   const todayStart = startOfDay(today)
   const weekStart = startOfWeek(today)
   
-  const todayLogs = logs.filter(log => new Date(log.id) >= todayStart)
-  const weekLogs = logs.filter(log => new Date(log.id) >= weekStart)
+  const todayLogs = logs.filter(log => {
+    if (!log || !log.id) return false
+    try {
+      const logDate = new Date(log.id)
+      return !isNaN(logDate.getTime()) && logDate >= todayStart
+    } catch (error) {
+      console.error('Invalid log date:', log.id)
+      return false
+    }
+  })
   
-  const todayMoods = todayLogs.filter(log => log.type === 'feeling')
-  const weekMoods = weekLogs.filter(log => log.type === 'feeling')
+  const weekLogs = logs.filter(log => {
+    if (!log || !log.id) return false
+    try {
+      const logDate = new Date(log.id)
+      return !isNaN(logDate.getTime()) && logDate >= weekStart
+    } catch (error) {
+      console.error('Invalid log date:', log.id)
+      return false
+    }
+  })
+  
+  const todayMoods = todayLogs.filter(log => log.type === 'feeling' && log.value)
+  const weekMoods = weekLogs.filter(log => log.type === 'feeling' && log.value)
   
   // Most common mood today
   const todayMoodCounts = todayMoods.reduce((acc, log) => {
-    acc[log.value] = (acc[log.value] || 0) + 1
+    if (log.value) {
+      acc[log.value] = (acc[log.value] || 0) + 1
+    }
     return acc
   }, {})
   
@@ -181,7 +271,9 @@ export const getQuickStats = (logs) => {
   
   // Week trend
   const weekMoodCounts = weekMoods.reduce((acc, log) => {
-    acc[log.value] = (acc[log.value] || 0) + 1
+    if (log.value) {
+      acc[log.value] = (acc[log.value] || 0) + 1
+    }
     return acc
   }, {})
   

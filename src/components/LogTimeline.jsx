@@ -6,29 +6,41 @@ function LogTimeline({ logs, onDeleteLog, onEditLog }) {
 
   // Format timestamp to show full date and time
   const formatTimestamp = (timestamp) => {
-    const date = new Date(timestamp)
-    const now = new Date()
-    const diffTime = Math.abs(now - date)
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
-    
-    const timeStr = date.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit',
-      hour12: true 
-    })
-    
-    if (diffDays === 0) {
-      return `Today at ${timeStr}`
-    } else if (diffDays === 1) {
-      return `Yesterday at ${timeStr}`
-    } else if (diffDays < 7) {
-      return `${diffDays} days ago at ${timeStr}`
-    } else {
-      return date.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric',
-        year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
-      }) + ` at ${timeStr}`
+    try {
+      // Handle both timestamp numbers and date objects
+      const date = typeof timestamp === 'number' ? new Date(timestamp) : new Date(timestamp)
+      
+      // Check if the date is valid
+      if (isNaN(date.getTime())) {
+        return 'Invalid date'
+      }
+      
+      const now = new Date()
+      const diffTime = Math.abs(now - date)
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+      
+      const timeStr = date.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit',
+        hour12: true 
+      })
+      
+      if (diffDays === 0) {
+        return `Today at ${timeStr}`
+      } else if (diffDays === 1) {
+        return `Yesterday at ${timeStr}`
+      } else if (diffDays < 7) {
+        return `${diffDays} days ago at ${timeStr}`
+      } else {
+        return date.toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric',
+          year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+        }) + ` at ${timeStr}`
+      }
+    } catch (error) {
+      console.error('Error formatting timestamp:', error)
+      return 'Invalid date'
     }
   }
 
