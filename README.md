@@ -48,6 +48,21 @@ The app uses localStorage for data persistence and includes demo data for initia
 - Switch to Analytics tab for data visualizations.
 - Click 'Get Gemini AI Insights' for AI analysis (requires logs and valid API key).
 
+## 📚 Documentation
+
+- **[Development Guide](DEVELOPMENT.md)** - Architecture, patterns, and development guidelines
+- **[Bug Fixes](BUGFIXES.md)** - Recent bug fixes and technical details  
+- **[Contributing](CONTRIBUTING.md)** - How to contribute to the project
+
+## 🔧 Recent Bug Fixes
+
+This version includes fixes for:
+- ✅ Inconsistent timestamp handling causing analytics issues
+- ✅ Student deletion logic error  
+- ✅ Log ID collision prevention
+
+See [BUGFIXES.md](BUGFIXES.md) for detailed technical information.
+
 ## Components
 
 - **App.jsx**: Main app component managing state, students, and log operations. Uses localStorage for persistence.
