@@ -85,6 +85,19 @@ Students are objects with id, name, and logs array. Logs have id, type ('feeling
 - Data is stored in localStorage; consider backend integration for persistence.
 - Expand analytics and AI prompts as needed.
 
+## 📖 Documentation Improvements (July 2025)
+
+The following areas were historically opaque to new contributors. They now include full JSDoc/module comments and inline explanations:
+
+1. **`src/lib/utils.js` – `cn` helper**
+    * Clarifies why we combine `clsx` with `tailwind-merge` and shows a concrete example.
+2. **`src/components/ui/button.jsx` – Button primitive**
+    * Documents available variants/sizes and explains the reasoning behind using **CVA** for styling.
+3. **`src/components/ui/dialog.jsx` – Modal primitive**
+    * Describes how we wrap Radix UI for accessibility while retaining control over styling & animation.
+
+These examples set the bar for future pull requests: concise, purposeful comments that focus on *why*, not just *what*.
+
 ## License
 
 MIT License (or specify your license)." 
