@@ -231,6 +231,54 @@ export const detectPatterns = (logs) => {
       timestamp: new Date()
     })
   }
+
+  // Check for weekly patterns
+  const moodsByDayOfWeek = logs.reduce((acc, log) => {
+    if (log.type === 'feeling') {
+      const day = format(new Date(log.timestamp), 'EEEE');
+      if (!acc[day]) {
+        acc[day] = {};
+      }
+      if (!acc[day][log.value]) {
+        acc[day][log.value] = 0;
+      }
+      acc[day][log.value]++;
+    }
+    return acc;
+  }, {});
+
+  for (const day in moodsByDayOfWeek) {
+    for (const mood in moodsByDayOfWeek[day]) {
+      if (moodsByDayOfWeek[day][mood] >= 3) {
+        alerts.push({
+          type: 'info',
+          message: `Student typically feels ${mood} on ${day}s`,
+          timestamp: new Date()
+        });
+      }
+    }
+  }
+
+  // Check for correlation between high sensory input and negative moods
+  logs.forEach((log, index) => {
+    if (log.type === 'sensory' && log.intensity === 'High') {
+      const logTime = new Date(log.id);
+      const twoHoursLater = new Date(logTime.getTime() + 2 * 60 * 60 * 1000);
+      for (let i = index + 1; i < logs.length; i++) {
+        const nextLog = logs[i];
+        const nextLogTime = new Date(nextLog.id);
+        if (nextLogTime > twoHoursLater) break;
+        if (nextLog.type === 'feeling' && (nextLog.value === 'Angry' || nextLog.value === 'Anxious')) {
+          alerts.push({
+            type: 'warning',
+            message: `High ${log.category} input was followed by feeling ${nextLog.value}`,
+            timestamp: new Date()
+          });
+          break;
+        }
+      }
+    }
+  });
   
   return alerts
 }

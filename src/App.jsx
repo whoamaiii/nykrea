@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import Sidebar from './components/Sidebar'
 import MainContent from './components/MainContent'
+import ScheduleSettings from './components/ScheduleSettings'
 
 // Initial demo data
 const initialStudents = [
@@ -150,6 +151,39 @@ function App() {
     setStudents([...students, newStudent])
   }
 
+  // Function to delete a student
+  const handleDeleteStudent = (studentId) => {
+    setStudents(prevStudents => prevStudents.filter(student => student.id !== studentId))
+    // If the deleted student was selected, select the first student
+    if (selectedStudentId === studentId) {
+      setSelectedStudentId(students[0]?.id || null)
+    }
+  }
+
+  // Function to edit a student's name
+  const handleEditStudent = (studentId, newName) => {
+    setStudents(prevStudents =>
+      prevStudents.map(student =>
+        student.id === studentId ? { ...student, name: newName } : student
+      )
+    )
+  }
+
+  // Function to save schedule
+  const handleSaveSchedule = (schedule) => {
+    setStudents(prevStudents => {
+      return prevStudents.map(student => {
+        if (student.id === selectedStudentId) {
+          return {
+            ...student,
+            schedule: schedule
+          }
+        }
+        return student
+      })
+    })
+  }
+
   return (
     <div className="flex h-screen">
       <Sidebar 
@@ -157,12 +191,15 @@ function App() {
         selectedStudentId={selectedStudentId}
         onSelectStudent={setSelectedStudentId}
         onAddStudent={handleAddStudent}
+        onDeleteStudent={handleDeleteStudent}
+        onEditStudent={handleEditStudent}
       />
       <MainContent 
         student={selectedStudent}
         onAddLog={handleAddLog}
         onDeleteLog={handleDeleteLog}
         onEditLog={handleEditLog}
+        onSaveSchedule={handleSaveSchedule}
       />
     </div>
   )

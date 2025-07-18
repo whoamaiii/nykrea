@@ -2,15 +2,49 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background-color: #030712;
-  --sidebar-background: #111827;
-  --card-background: #1F2937;
-  --text-primary: #F9FAFB;
-  --text-secondary: #9CA3AF;
-  --accent-gradient-start: #8B5CF6;
-  --accent-gradient-end: #6D28D9;
-  --input-background: #374151;
+@layer base {
+  :root {
+    /* Your existing theme variables */
+    --background-color: #030712;
+    --sidebar-background: #111827;
+    --card-background: #1F2937;
+    --text-primary: #F9FAFB;
+    --text-secondary: #9CA3AF;
+    --accent-gradient-start: #8B5CF6;
+    --accent-gradient-end: #6D28D9;
+    --input-background: #374151;
+
+    /* shadcn/ui theme variables - mapped to your existing theme */
+    --background: 218 27% 4%; /* #030712 */
+    --foreground: 210 40% 98%; /* #F9FAFB */
+    --card: 217 19% 15%; /* #1F2937 */
+    --card-foreground: 210 40% 98%; /* #F9FAFB */
+    --popover: 217 19% 15%; /* #1F2937 */
+    --popover-foreground: 210 40% 98%; /* #F9FAFB */
+    --primary: 262 80% 65%; /* #8B5CF6 */
+    --primary-foreground: 210 40% 98%; /* #F9FAFB */
+    --secondary: 217 19% 15%; /* #1F2937 */
+    --secondary-foreground: 210 40% 98%; /* #F9FAFB */
+    --muted: 217 32% 17%; /* #374151 */
+    --muted-foreground: 215 20.2% 65.1%; /* #9CA3AF */
+    --accent: 262 80% 65%; /* #8B5CF6 */
+    --accent-foreground: 210 40% 98%; /* #F9FAFB */
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 32% 17%; /* #374151 */
+    --input: 217 32% 17%; /* #374151 */
+    --ring: 262 80% 65%; /* #8B5CF6 */
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
 body {

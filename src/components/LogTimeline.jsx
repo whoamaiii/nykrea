@@ -1,10 +1,20 @@
 import React, { useState } from 'react'
 
+/**
+ * Component for displaying and managing the timeline of student logs.
+ * Allows viewing, editing, and deleting logs.
+ * @param {Object} props - Component props
+ * @param {Array} props.logs - Array of log objects
+ * @param {Function} props.onDeleteLog - Callback to delete a log
+ * @param {Function} props.onEditLog - Callback to edit a log
+ */
 function LogTimeline({ logs, onDeleteLog, onEditLog }) {
+  // State for tracking which log is being edited
   const [editingLogId, setEditingLogId] = useState(null)
+  // State for edit form data
   const [editFormData, setEditFormData] = useState({})
 
-  // Format timestamp to show full date and time
+  // Function to format timestamp relative to now
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp)
     const now = new Date()
@@ -32,6 +42,7 @@ function LogTimeline({ logs, onDeleteLog, onEditLog }) {
     }
   }
 
+  // Handler to start editing a log
   const handleEditClick = (log) => {
     setEditingLogId(log.id)
     setEditFormData({
@@ -42,17 +53,20 @@ function LogTimeline({ logs, onDeleteLog, onEditLog }) {
     })
   }
 
+  // Handler to save edited log
   const handleSaveEdit = (logId) => {
     onEditLog(logId, editFormData)
     setEditingLogId(null)
     setEditFormData({})
   }
 
+  // Handler to cancel editing
   const handleCancelEdit = () => {
     setEditingLogId(null)
     setEditFormData({})
   }
 
+  // Handler to delete a log with confirmation
   const handleDelete = (logId) => {
     if (window.confirm('Are you sure you want to delete this log?')) {
       onDeleteLog(logId)

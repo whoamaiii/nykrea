@@ -1,9 +1,17 @@
 import React from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 
+/**
+ * Component to display the most recent student activity logs.
+ * Shows up to 3 recent logs with colored feelings.
+ * @param {Object} props - Component props
+ * @param {Array} props.logs - Array of log objects
+ */
 function RecentActivity({ logs }) {
-  // Get the first 3 logs for recent activity
+  // Select the first 3 logs for display
   const recentLogs = logs.slice(0, 3)
 
+  // Get color class based on feeling value
   const getColorClass = (value) => {
     switch (value) {
       case 'Happy': return 'text-green-400'
@@ -16,9 +24,12 @@ function RecentActivity({ logs }) {
   }
 
   return (
-    <div className="mt-8 bg-[var(--card-background)] rounded-2xl p-6 shadow-2xl border border-gray-700/50">
-      <h3 className="text-xl font-semibold mb-6 text-white">Recent Activity Timeline</h3>
-      <div className="space-y-4">
+    <Card className="mt-8">
+      <CardHeader>
+        <CardTitle className="text-xl">Recent Activity Timeline</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
         {recentLogs.length === 0 ? (
           <p className="text-center text-gray-500 py-8">No recent activity</p>
         ) : (
@@ -44,8 +55,9 @@ function RecentActivity({ logs }) {
             </div>
           ))
         )}
-      </div>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

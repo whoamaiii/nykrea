@@ -1,26 +1,34 @@
 import React, { useState } from 'react'
 
+/**
+ * Component for logging student feelings and sensory inputs.
+ * Allows selection of emotions and sensory intensities with notes.
+ * @param {Object} props - Component props
+ * @param {Function} props.onAddLog - Callback function to add a new log entry
+ */
 function StudentLoggingView({ onAddLog }) {
+  // State to manage sensory input data for each category
   const [sensoryInputs, setSensoryInputs] = useState({
     Visual: { intensity: null, notes: '' },
     Auditory: { intensity: null, notes: '' },
     Tactile: { intensity: null, notes: '' }
   })
+  const [environmentalFactors, setEnvironmentalFactors] = useState('');
 
+  // Handler for when a feeling button is clicked
   const handleFeelingClick = (feeling) => {
     const newLog = {
       id: Date.now(),
       type: 'feeling',
       value: feeling,
-      timestamp: new Date().toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
-        minute: '2-digit', 
-        hour12: true 
-      })
+      timestamp: new Date().toISOString(),
+      environmentalFactors,
     }
     onAddLog(newLog)
+    setEnvironmentalFactors('');
   }
 
+  // Handler to update intensity for a sensory category
   const handleIntensityChange = (category, intensity) => {
     setSensoryInputs({
       ...sensoryInputs,
@@ -31,6 +39,7 @@ function StudentLoggingView({ onAddLog }) {
     })
   }
 
+  // Handler to log a sensory input
   const handleLogSensory = (category) => {
     if (!sensoryInputs[category].intensity) return;
     
@@ -40,16 +49,13 @@ function StudentLoggingView({ onAddLog }) {
       category: category,
       intensity: sensoryInputs[category].intensity,
       notes: sensoryInputs[category].notes,
-      timestamp: new Date().toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
-        minute: '2-digit', 
-        hour12: true 
-      })
+      timestamp: new Date().toISOString(),
+      environmentalFactors,
     }
     
     onAddLog(newLog)
     
-    // Reset the intensity and notes for this category
+    // Reset the intensity and notes for this category after logging
     setSensoryInputs({
       ...sensoryInputs,
       [category]: {
@@ -59,6 +65,7 @@ function StudentLoggingView({ onAddLog }) {
     })
   }
 
+  // Handler to update notes for a sensory category
   const handleNotesChange = (category, notes) => {
     setSensoryInputs({
       ...sensoryInputs,
@@ -73,6 +80,18 @@ function StudentLoggingView({ onAddLog }) {
     <div className="bg-[var(--card-background)] rounded-2xl p-6 shadow-2xl border border-gray-700/50">
       <h3 className="text-xl font-semibold mb-4 text-white">Student Logging View</h3>
       <div className="space-y-6">
+        <div>
+          <label className="text-lg font-medium text-[var(--text-secondary)] mb-3 block">
+            Environmental Factors
+          </label>
+          <input
+            className="w-full bg-[var(--input-background)] border border-gray-600 rounded-md px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[var(--accent-gradient-start)]"
+            placeholder="e.g., loud cafeteria, substitute teacher"
+            type="text"
+            value={environmentalFactors}
+            onChange={(e) => setEnvironmentalFactors(e.target.value)}
+          />
+        </div>
         <div>
           <label className="text-lg font-medium text-[var(--text-secondary)] mb-3 block">
             How are you feeling?

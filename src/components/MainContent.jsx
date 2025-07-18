@@ -4,8 +4,10 @@ import LogTimeline from './LogTimeline'
 import RecentActivity from './RecentActivity'
 import InsightsModal from './InsightsModal'
 import Analytics from './Analytics'
+import ScheduleSettings from './ScheduleSettings'
+import { Button } from './ui/button'
 
-function MainContent({ student, onAddLog, onDeleteLog, onEditLog }) {
+function MainContent({ student, onAddLog, onDeleteLog, onEditLog, onSaveSchedule }) {
   // State management for AI Insights Modal
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -45,11 +47,11 @@ Please provide:
 Keep your response concise and practical for a busy teacher.`
 
     try {
-      // WARNING: API key is hardcoded for POC only - DO NOT USE IN PRODUCTION
-      const API_KEY = 'AIzaSyCHlUphzuYLfs4TXJpftQuTDH1aBQ17rDA' // Replace with your actual API key
+      // Get API key from environment variable
+      const API_KEY = import.meta.env.VITE_GEMINI_API_KEY
       
-      if (API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
-        throw new Error('Please add your Gemini API key in MainContent.jsx (line 45). Get your API key from https://makersuite.google.com/app/apikey')
+      if (!API_KEY || API_KEY === 'your_gemini_api_key_here') {
+        throw new Error('Please add your Gemini API key to .env file. Copy .env.example to .env and add your key. Get your API key from https://makersuite.google.com/app/apikey')
       }
 
       // Check if there are any logs to analyze
@@ -151,10 +153,26 @@ Keep your response concise and practical for a busy teacher.`
             Analytics
           </div>
         </button>
+        <button
+          onClick={() => setActiveTab('settings')}
+          className={`px-6 py-3 font-medium transition-colors ${
+            activeTab === 'settings'
+              ? 'text-white border-b-2 border-[var(--accent-gradient-start)]'
+              : 'text-[var(--text-secondary)] hover:text-white'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Settings
+          </div>
+        </button>
       </div>
       
       {/* Tab Content */}
-      {activeTab === 'logging' ? (
+      {activeTab === 'logging' && (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
@@ -172,16 +190,17 @@ Keep your response concise and practical for a busy teacher.`
           <RecentActivity logs={student.logs} />
           
           <div className="mt-8">
-            <button
+            <Button
               onClick={handleGetInsights}
-              className="w-full text-lg font-bold text-white py-4 px-6 rounded-lg bg-gradient-to-r from-[var(--accent-gradient-start)] to-[var(--accent-gradient-end)] hover:from-[var(--accent-gradient-start)]/90 hover:to-[var(--accent-gradient-end)]/90 transition-all duration-300 shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-400/50">
+              className="w-full text-lg font-bold py-4 px-6 bg-gradient-to-r from-[var(--accent-gradient-start)] to-[var(--accent-gradient-end)] hover:from-[var(--accent-gradient-start)]/90 hover:to-[var(--accent-gradient-end)]/90 shadow-xl"
+              size="lg">
               Get Gemini AI Insights
-            </button>
+            </Button>
           </div>
         </>
-      ) : (
-        <Analytics logs={student.logs} studentName={student.name} />
       )}
+      {activeTab === 'analytics' && <Analytics logs={student.logs} studentName={student.name} schedule={student.schedule} />}
+      {activeTab === 'settings' && <ScheduleSettings schedule={student.schedule} onSave={onSaveSchedule} />}
 
       {/* AI Insights Modal */}
       <InsightsModal
