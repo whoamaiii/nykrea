@@ -130,37 +130,79 @@ export const getSensoryIntensityData = (logs, days = 7) => {
   return heatmapData
 }
 
-// Correlation analysis between sensory and mood
+/**
+ * Analyzes temporal correlations between sensory inputs and mood states.
+ * 
+ * This function examines whether specific sensory experiences (Visual, Auditory, Tactile)
+ * are followed by particular mood states within a 2-hour window. This is crucial for 
+ * understanding sensory triggers and their emotional impact on students, particularly 
+ * those with neurodiversity who may have heightened sensitivities.
+ * 
+ * The algorithm uses a sliding window approach: for each sensory log, it searches forward
+ * through subsequent logs to find mood entries that occur within 2 hours. This timeframe
+ * balances capturing genuine correlations while avoiding false positives from unrelated events.
+ * 
+ * @param {Array<Object>} logs - Array of student log entries, must be chronologically ordered
+ * @param {string} logs[].type - Log type: 'sensory' or 'feeling'
+ * @param {string} logs[].category - For sensory logs: 'Visual', 'Auditory', or 'Tactile'
+ * @param {string} logs[].value - For feeling logs: 'Happy', 'Sad', 'Angry', or 'Anxious'
+ * @param {number|string} logs[].timestamp - Unix timestamp or parseable date string
+ * @param {number|string} logs[].id - Fallback timestamp if timestamp field is missing
+ * 
+ * @returns {Array<Object>} Correlation data for visualization and analysis
+ * @returns {string} returns[].sensory - Sensory category ('Visual', 'Auditory', 'Tactile')
+ * @returns {string} returns[].mood - Mood state ('Happy', 'Sad', 'Angry', 'Anxious')
+ * @returns {number} returns[].count - Number of times this sensory-mood pair was observed
+ * 
+ * @throws {Error} Throws if logs array contains invalid timestamp data
+ * 
+ * @example
+ * const logs = [
+ *   { type: 'sensory', category: 'Auditory', timestamp: 1640995200000 },
+ *   { type: 'feeling', value: 'Anxious', timestamp: 1640999800000 }  // 1 hour later
+ * ];
+ * const correlations = getSensoryMoodCorrelation(logs);
+ * // Returns: [{ sensory: 'Auditory', mood: 'Anxious', count: 1 }]
+ */
 export const getSensoryMoodCorrelation = (logs) => {
   const correlations = []
+  // Define the sensory categories and mood states we're tracking
+  // These align with the application's logging interface
   const sensoryCategories = ['Visual', 'Auditory', 'Tactile']
   const moods = ['Happy', 'Sad', 'Angry', 'Anxious']
   
+  // Create a correlation matrix by examining each sensory-mood combination
   sensoryCategories.forEach(category => {
     moods.forEach(mood => {
-      // Find sensory logs followed by mood logs within 2 hours
+      // Counter for how many times this specific sensory input leads to this mood
       let correlationCount = 0
       
+      // Iterate through logs to find sensory events and their subsequent mood changes
       logs.forEach((log, index) => {
         if (log.type === 'sensory' && log.category === category) {
-          // Look for mood logs within next 2 hours
+          // Found a sensory log of the category we're analyzing
           const logTime = new Date(getLogTimestamp(log))
+          // Define the correlation window (2 hours after the sensory event)
           const twoHoursLater = new Date(logTime.getTime() + 2 * 60 * 60 * 1000)
           
+          // Search forward through subsequent logs for mood entries within the window
           for (let i = index + 1; i < logs.length; i++) {
             const nextLog = logs[i]
             const nextLogTime = new Date(getLogTimestamp(nextLog))
             
+            // Stop searching if we've exceeded the 2-hour correlation window
             if (nextLogTime > twoHoursLater) break
             
+            // If we find a matching mood within the window, count it as a correlation
             if (nextLog.type === 'feeling' && nextLog.value === mood) {
               correlationCount++
-              break
+              break // Only count the first mood occurrence to avoid double-counting
             }
           }
         }
       })
       
+      // Store the correlation data for this sensory-mood pair
       correlations.push({
         sensory: category,
         mood,
@@ -169,6 +211,8 @@ export const getSensoryMoodCorrelation = (logs) => {
     })
   })
   
+  // Return only correlations that actually occurred (filter out zero counts)
+  // This reduces noise in visualizations and focuses on meaningful patterns
   return correlations.filter(c => c.count > 0)
 }
 
@@ -209,12 +253,48 @@ export const getQuickStats = (logs) => {
   }
 }
 
-// Pattern detection for alerts
+/**
+ * Detects concerning patterns and trends in student emotional and sensory data.
+ * 
+ * This function implements a multi-layered pattern detection system designed to identify
+ * situations that may require educator intervention. It analyzes both short-term spikes
+ * in negative emotions and long-term behavioral patterns, which is particularly important
+ * for supporting students with neurodiversity who may experience sensory overwhelm.
+ * 
+ * The detection algorithms include:
+ * 1. Acute distress detection (multiple negative emotions in 2 hours)
+ * 2. Sensory overload identification (repeated high-intensity sensory inputs)
+ * 3. Weekly pattern recognition (consistent mood patterns on specific days)
+ * 4. Causal relationship detection (sensory triggers leading to negative emotions)
+ * 
+ * @param {Array<Object>} logs - Student log entries sorted chronologically
+ * @param {string} logs[].type - 'feeling' or 'sensory'
+ * @param {string} logs[].value - For feelings: 'Happy', 'Sad', 'Angry', 'Anxious'
+ * @param {string} logs[].intensity - For sensory: 'Low', 'Medium', 'High'
+ * @param {string} logs[].category - For sensory: 'Visual', 'Auditory', 'Tactile'
+ * @param {number|string} logs[].timestamp - Unix timestamp or parseable date
+ * 
+ * @returns {Array<Object>} Array of alert objects for UI notification
+ * @returns {string} returns[].type - Alert severity: 'warning', 'info'
+ * @returns {string} returns[].message - Human-readable alert description
+ * @returns {Date} returns[].timestamp - When the alert was generated
+ * 
+ * @example
+ * const logs = [
+ *   { type: 'feeling', value: 'Anxious', timestamp: Date.now() - 3600000 },
+ *   { type: 'feeling', value: 'Angry', timestamp: Date.now() - 1800000 },
+ *   { type: 'feeling', value: 'Anxious', timestamp: Date.now() }
+ * ];
+ * const alerts = detectPatterns(logs);
+ * // Returns: [{ type: 'warning', message: '3 anxious/angry logs in the past 2 hours', timestamp: Date }]
+ */
 export const detectPatterns = (logs) => {
   const alerts = []
+  // Define time boundaries for acute pattern detection
   const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000)
   
-  // Check for multiple anxious/angry logs in past 2 hours
+  // PATTERN 1: Acute emotional distress detection
+  // Multiple negative emotions in a short timeframe may indicate immediate need for support
   const recentNegativeMoods = logs.filter(log => {
     const logTime = new Date(getLogTimestamp(log))
     return log.type === 'feeling' && 
@@ -222,6 +302,7 @@ export const detectPatterns = (logs) => {
            logTime >= twoHoursAgo
   })
   
+  // Threshold of 3+ negative emotions indicates potential crisis requiring intervention
   if (recentNegativeMoods.length >= 3) {
     alerts.push({
       type: 'warning',
@@ -230,7 +311,8 @@ export const detectPatterns = (logs) => {
     })
   }
   
-  // Check for high sensory intensity patterns
+  // PATTERN 2: Sensory overload detection
+  // Repeated high-intensity sensory inputs may indicate environmental stressors
   const recentHighSensory = logs.filter(log => {
     const logTime = new Date(getLogTimestamp(log))
     return log.type === 'sensory' && 
@@ -238,6 +320,7 @@ export const detectPatterns = (logs) => {
            logTime >= twoHoursAgo
   })
   
+  // Two or more high-intensity sensory events suggest potential sensory overwhelm
   if (recentHighSensory.length >= 2) {
     alerts.push({
       type: 'info',
@@ -246,7 +329,8 @@ export const detectPatterns = (logs) => {
     })
   }
 
-  // Check for weekly patterns
+  // PATTERN 3: Weekly behavioral pattern recognition
+  // Identifies consistent mood patterns on specific days (e.g., "Monday anxiety")
   const moodsByDayOfWeek = logs.reduce((acc, log) => {
     if (log.type === 'feeling') {
       const day = format(new Date(getLogTimestamp(log)), 'EEEE');
@@ -261,6 +345,7 @@ export const detectPatterns = (logs) => {
     return acc;
   }, {});
 
+  // Alert when a mood occurs 3+ times on the same day of week (indicates pattern)
   for (const day in moodsByDayOfWeek) {
     for (const mood in moodsByDayOfWeek[day]) {
       if (moodsByDayOfWeek[day][mood] >= 3) {
@@ -273,22 +358,28 @@ export const detectPatterns = (logs) => {
     }
   }
 
-  // Check for correlation between high sensory input and negative moods
+  // PATTERN 4: Causal relationship detection (sensory trigger -> negative emotion)
+  // Identifies when high sensory input precedes negative emotions, suggesting triggers
   logs.forEach((log, index) => {
     if (log.type === 'sensory' && log.intensity === 'High') {
       const logTime = new Date(getLogTimestamp(log));
+      // Look for negative emotions within 2 hours of high sensory input
       const twoHoursLater = new Date(logTime.getTime() + 2 * 60 * 60 * 1000);
+      
+      // Search subsequent logs for negative emotional responses
       for (let i = index + 1; i < logs.length; i++) {
         const nextLog = logs[i];
         const nextLogTime = new Date(getLogTimestamp(nextLog));
-        if (nextLogTime > twoHoursLater) break;
+        if (nextLogTime > twoHoursLater) break; // Outside correlation window
+        
+        // Found a negative emotion following high sensory input - potential trigger
         if (nextLog.type === 'feeling' && (nextLog.value === 'Angry' || nextLog.value === 'Anxious')) {
           alerts.push({
             type: 'warning',
             message: `High ${log.category} input was followed by feeling ${nextLog.value}`,
             timestamp: new Date()
           });
-          break;
+          break; // Only report the first occurrence to avoid spam
         }
       }
     }
