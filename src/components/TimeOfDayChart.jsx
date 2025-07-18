@@ -15,7 +15,14 @@ const TimeOfDayChart = ({ data }) => {
   };
 
   data.forEach(log => {
-    const logDate = new Date(log.timestamp);
+    // Helper function to get timestamp from log (handles both old and new formats)
+    const getLogTimestamp = (log) => {
+      if (typeof log.timestamp === 'number') return log.timestamp;
+      if (typeof log.timestamp === 'string') return new Date(log.timestamp).getTime();
+      return typeof log.id === 'number' ? log.id : new Date(log.id).getTime();
+    }
+    
+    const logDate = new Date(getLogTimestamp(log));
     const hour = logDate.getHours();
     for (const segment in timeSegments) {
       if (hour >= timeSegments[segment].start && hour < timeSegments[segment].end) {

@@ -17,11 +17,12 @@ function StudentLoggingView({ onAddLog }) {
 
   // Handler for when a feeling button is clicked
   const handleFeelingClick = (feeling) => {
+    const timestamp = Date.now() + Math.floor(Math.random() * 100); // Add small random component to prevent ID collisions
     const newLog = {
-      id: Date.now(),
+      id: timestamp,
       type: 'feeling',
       value: feeling,
-      timestamp: new Date().toISOString(),
+      timestamp: timestamp, // Use Unix timestamp consistently
       environmentalFactors,
     }
     onAddLog(newLog)
@@ -43,13 +44,14 @@ function StudentLoggingView({ onAddLog }) {
   const handleLogSensory = (category) => {
     if (!sensoryInputs[category].intensity) return;
     
+    const timestamp = Date.now() + Math.floor(Math.random() * 100); // Add small random component to prevent ID collisions
     const newLog = {
-      id: Date.now(),
+      id: timestamp,
       type: 'sensory',
       category: category,
       intensity: sensoryInputs[category].intensity,
       notes: sensoryInputs[category].notes,
-      timestamp: new Date().toISOString(),
+      timestamp: timestamp, // Use Unix timestamp consistently
       environmentalFactors,
     }
     

@@ -1,5 +1,19 @@
 import { startOfDay, startOfWeek, startOfMonth, format, subDays, eachDayOfInterval, eachHourOfInterval, startOfHour, endOfDay } from 'date-fns'
 
+// Helper function to get timestamp from log (handles both old and new formats)
+const getLogTimestamp = (log) => {
+  // If timestamp exists and is a number, use it
+  if (typeof log.timestamp === 'number') {
+    return log.timestamp;
+  }
+  // If timestamp exists and is a string, parse it
+  if (typeof log.timestamp === 'string') {
+    return new Date(log.timestamp).getTime();
+  }
+  // Fallback to id (for backward compatibility)
+  return typeof log.id === 'number' ? log.id : new Date(log.id).getTime();
+}
+
 // Mood distribution for pie chart
 export const getMoodDistribution = (logs) => {
   const moodCounts = logs
@@ -29,7 +43,7 @@ export const getMoodTrends = (logs, days = 7) => {
     const dayEnd = endOfDay(date)
     
     const dayLogs = logs.filter(log => {
-      const logDate = new Date(log.id)
+      const logDate = new Date(getLogTimestamp(log))
       return log.type === 'feeling' && logDate >= dayStart && logDate <= dayEnd
     })
     
@@ -56,7 +70,7 @@ export const getTimeOfDayAnalysis = (logs) => {
   const moodsByHour = hours.map(hour => {
     const hourLogs = logs.filter(log => {
       if (log.type !== 'feeling') return false
-      const logDate = new Date(log.id)
+      const logDate = new Date(getLogTimestamp(log))
       return logDate.getHours() === hour
     })
     
@@ -93,7 +107,7 @@ export const getSensoryIntensityData = (logs, days = 7) => {
     
     sensoryCategories.forEach(category => {
       const dayLogs = logs.filter(log => {
-        const logDate = new Date(log.id)
+        const logDate = new Date(getLogTimestamp(log))
         return log.type === 'sensory' && 
                log.category === category && 
                logDate >= dayStart && 
@@ -130,12 +144,12 @@ export const getSensoryMoodCorrelation = (logs) => {
       logs.forEach((log, index) => {
         if (log.type === 'sensory' && log.category === category) {
           // Look for mood logs within next 2 hours
-          const logTime = new Date(log.id)
+          const logTime = new Date(getLogTimestamp(log))
           const twoHoursLater = new Date(logTime.getTime() + 2 * 60 * 60 * 1000)
           
           for (let i = index + 1; i < logs.length; i++) {
             const nextLog = logs[i]
-            const nextLogTime = new Date(nextLog.id)
+            const nextLogTime = new Date(getLogTimestamp(nextLog))
             
             if (nextLogTime > twoHoursLater) break
             
@@ -164,8 +178,8 @@ export const getQuickStats = (logs) => {
   const todayStart = startOfDay(today)
   const weekStart = startOfWeek(today)
   
-  const todayLogs = logs.filter(log => new Date(log.id) >= todayStart)
-  const weekLogs = logs.filter(log => new Date(log.id) >= weekStart)
+  const todayLogs = logs.filter(log => new Date(getLogTimestamp(log)) >= todayStart)
+  const weekLogs = logs.filter(log => new Date(getLogTimestamp(log)) >= weekStart)
   
   const todayMoods = todayLogs.filter(log => log.type === 'feeling')
   const weekMoods = weekLogs.filter(log => log.type === 'feeling')
@@ -202,7 +216,7 @@ export const detectPatterns = (logs) => {
   
   // Check for multiple anxious/angry logs in past 2 hours
   const recentNegativeMoods = logs.filter(log => {
-    const logTime = new Date(log.id)
+    const logTime = new Date(getLogTimestamp(log))
     return log.type === 'feeling' && 
            (log.value === 'Anxious' || log.value === 'Angry') &&
            logTime >= twoHoursAgo
@@ -218,7 +232,7 @@ export const detectPatterns = (logs) => {
   
   // Check for high sensory intensity patterns
   const recentHighSensory = logs.filter(log => {
-    const logTime = new Date(log.id)
+    const logTime = new Date(getLogTimestamp(log))
     return log.type === 'sensory' && 
            log.intensity === 'High' &&
            logTime >= twoHoursAgo
@@ -235,7 +249,7 @@ export const detectPatterns = (logs) => {
   // Check for weekly patterns
   const moodsByDayOfWeek = logs.reduce((acc, log) => {
     if (log.type === 'feeling') {
-      const day = format(new Date(log.timestamp), 'EEEE');
+      const day = format(new Date(getLogTimestamp(log)), 'EEEE');
       if (!acc[day]) {
         acc[day] = {};
       }
@@ -262,11 +276,11 @@ export const detectPatterns = (logs) => {
   // Check for correlation between high sensory input and negative moods
   logs.forEach((log, index) => {
     if (log.type === 'sensory' && log.intensity === 'High') {
-      const logTime = new Date(log.id);
+      const logTime = new Date(getLogTimestamp(log));
       const twoHoursLater = new Date(logTime.getTime() + 2 * 60 * 60 * 1000);
       for (let i = index + 1; i < logs.length; i++) {
         const nextLog = logs[i];
-        const nextLogTime = new Date(nextLog.id);
+        const nextLogTime = new Date(getLogTimestamp(nextLog));
         if (nextLogTime > twoHoursLater) break;
         if (nextLog.type === 'feeling' && (nextLog.value === 'Angry' || nextLog.value === 'Anxious')) {
           alerts.push({
@@ -286,7 +300,7 @@ export const detectPatterns = (logs) => {
 // Filter logs by date range
 export const filterLogsByDateRange = (logs, startDate, endDate) => {
   return logs.filter(log => {
-    const logDate = new Date(log.id)
+    const logDate = new Date(getLogTimestamp(log))
     return logDate >= startDate && logDate <= endDate
   })
 }
