@@ -54,6 +54,19 @@ The app uses localStorage for data persistence and includes demo data for initia
 - **[Bug Fixes](BUGFIXES.md)** - Recent bug fixes and technical details  
 - **[Contributing](CONTRIBUTING.md)** - How to contribute to the project
 
+### 📝 Documentation Improvements (2025-07)
+
+The following modules received comprehensive inline documentation and JSDoc comments to set the pattern for future contributions:
+
+1. **utils/analyticsHelpers.js – `getSensoryMoodCorrelation`**
+   *Clarifies the two-hour look-ahead algorithm used to detect correlations between sensory events and mood changes.*
+2. **components/FeelingsChart.jsx**
+   *Explains that the component is intentionally stateless and relies on pre-aggregated data for performance.*
+3. **components/ScheduleSettings.jsx**
+   *Documents the draft-edit workflow (local copy vs. `onSave`) that protects persisted schedules from accidental edits.*
+
+These notes aim to make the underlying design intent explicit so new maintainers can modify behaviour without introducing regressions.
+
 ## 🔧 Recent Bug Fixes
 
 This version includes fixes for:

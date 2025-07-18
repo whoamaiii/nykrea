@@ -1,18 +1,48 @@
 import React, { useState } from 'react';
 
+/**
+ * @fileoverview Form UI for entering a student's recurring school timetable.
+ *               The schedule is later reused by analytics components to correlate
+ *               moods with school subjects.
+ */
 const ScheduleSettings = ({ schedule, onSave }) => {
+  /**
+   * ScheduleSettings
+   * ----------------
+   * Controlled form that lets the teacher build a list of periods (start-time, end-time, subject).
+   * The component keeps its own *draft* copy in local state so the user can freely edit without
+   * immediately overwriting the persisted schedule. Only when the *Save* button is pressed do we
+   * bubble the draft up via `onSave`.
+   *
+   * @param {Object} props
+   * @param {Array<{ start: string, end: string, subject: string }>} [props.schedule=[]] – Existing
+   *        schedule to pre-populate the form. Times are stored in 24-hour HH:mm strings so we can
+   *        feed them straight into `<input type="time">`.
+   * @param {(newSchedule: Array) => void} props.onSave – Callback fired with the draft schedule when
+   *        the user presses the *Save* button.
+   *
+   * @returns {React.ReactElement}
+   *
+   * @example
+   * <ScheduleSettings schedule={studentSchedule} onSave={(s) => setStudentSchedule(s)} />
+   */
   const [localSchedule, setLocalSchedule] = useState(schedule || []);
 
+  // ---------- Event handlers ------------------------------------------------
+
+  // Adds a new period with default time range so the row is never empty.
   const handleAddPeriod = () => {
     setLocalSchedule([...localSchedule, { start: '09:00', end: '10:00', subject: '' }]);
   };
 
+  // Removes a period by index. We copy the array first to preserve immutability.
   const handleRemovePeriod = (index) => {
     const newSchedule = [...localSchedule];
     newSchedule.splice(index, 1);
     setLocalSchedule(newSchedule);
   };
 
+  // Generic change handler that updates a single field in the period object.
   const handleChange = (index, field, value) => {
     const newSchedule = [...localSchedule];
     newSchedule[index][field] = value;

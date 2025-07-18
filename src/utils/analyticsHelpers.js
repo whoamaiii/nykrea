@@ -130,29 +130,59 @@ export const getSensoryIntensityData = (logs, days = 7) => {
   return heatmapData
 }
 
-// Correlation analysis between sensory and mood
+/**
+ * Calculates how often each sensory input category is followed by a particular mood within
+ * a two-hour time window.
+ *
+ * The log array is expected to be in chronological order (oldest → newest). For every sensory
+ * event we perform a look-ahead scan until we either reach the end of the log list or step
+ * past the two-hour window. If a mood entry matching one of the tracked moods is found inside
+ * that window, the corresponding sensory-mood counter is incremented once.
+ *
+ * Parameters
+ * ----------
+ * @param {Array<Object>} logs  – List of log objects. Each object combines both *feeling* and
+ *                                *sensory* shapes and **must** contain either a `timestamp`
+ *                                (number | ISO string) or an `id` that can be coerced into a
+ *                                timestamp. The list should already be sorted chronologically
+ *                                for the correlation logic to make sense.
+ *
+ * @returns {Array<{ sensory: string, mood: string, count: number }>}  Array containing an entry
+ *          for every sensory × mood pair that occurred at least once within the 2-hour window.
+ *
+ * @example
+ * // Returns something like → [{ sensory: 'Visual', mood: 'Anxious', count: 2 }]
+ * const correlations = getSensoryMoodCorrelation(studentLogs);
+ */
 export const getSensoryMoodCorrelation = (logs) => {
+  // Track correlation counts. We build this up incrementally and later
+  // filter out the pairs that never occurred.
   const correlations = []
   const sensoryCategories = ['Visual', 'Auditory', 'Tactile']
   const moods = ['Happy', 'Sad', 'Angry', 'Anxious']
-  
+
+  // Iterate over every combination of sensory category and mood we care about.
   sensoryCategories.forEach(category => {
     moods.forEach(mood => {
-      // Find sensory logs followed by mood logs within 2 hours
+      // Counter for the current (category, mood) pair.
       let correlationCount = 0
-      
+
+      // Walk the full log list once for each pair. This is O(N * categories * moods)
+      // but the data set is small enough that the simplicity is worth the cost.
       logs.forEach((log, index) => {
         if (log.type === 'sensory' && log.category === category) {
-          // Look for mood logs within next 2 hours
+          // We found a sensory event – now look forward up to two hours.
           const logTime = new Date(getLogTimestamp(log))
           const twoHoursLater = new Date(logTime.getTime() + 2 * 60 * 60 * 1000)
-          
+
+          // Scan subsequent logs until we leave the 2-hour window.
           for (let i = index + 1; i < logs.length; i++) {
             const nextLog = logs[i]
             const nextLogTime = new Date(getLogTimestamp(nextLog))
-            
-            if (nextLogTime > twoHoursLater) break
-            
+
+            if (nextLogTime > twoHoursLater) break // Outside the window → stop scanning
+
+            // Count the first occurrence of the target mood and move on to the next sensory log.
             if (nextLog.type === 'feeling' && nextLog.value === mood) {
               correlationCount++
               break
@@ -160,7 +190,7 @@ export const getSensoryMoodCorrelation = (logs) => {
           }
         }
       })
-      
+
       correlations.push({
         sensory: category,
         mood,
@@ -168,7 +198,8 @@ export const getSensoryMoodCorrelation = (logs) => {
       })
     })
   })
-  
+
+  // Remove zero-count entries to keep the charting layer tidy.
   return correlations.filter(c => c.count > 0)
 }
 
