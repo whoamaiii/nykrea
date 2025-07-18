@@ -1,3 +1,33 @@
+/**
+ * Accessible dialog (modal) primitive built on top of `@radix-ui/react-dialog`.
+ *
+ * Why not roll our own? Radix handles a11y, focus-trapping, and scroll
+ * locking for us, while still giving full styling control. All we do here is:
+ *   • Provide a thin re-export layer so the rest of the codebase can import
+ *     from one place ("../components/ui/dialog") instead of Radix directly.
+ *   • Attach Tailwind/CSS animations for a polished appearance.
+ *
+ * The most common usage pattern looks like this:
+ * ```jsx
+ * import {
+ *   Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription
+ * } from "../components/ui/dialog";
+ *
+ * <Dialog>
+ *   <DialogTrigger asChild>
+ *     <Button>Edit profile</Button>
+ *   </DialogTrigger>
+ *   <DialogContent>
+ *     <DialogTitle>Edit profile</DialogTitle>
+ *     <DialogDescription>Make changes and save.</DialogDescription>
+ *     ...
+ *   </DialogContent>
+ * </Dialog>
+ * ```
+ *
+ * Exports mirror Radix's API, so refer to their docs for advanced props.
+ */
+// ---------------------------------------------------------------------------
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { X } from "lucide-react"
@@ -27,6 +57,11 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 const DialogContent = React.forwardRef(({ className, children, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
+    {/*
+      The actual modal panel. Animations are driven by Radix data attributes
+      (`data-state`) which toggle Tailwind @keyframe utilities defined in the
+      project’s CSS. See DEVELOPMENT.md → Animations for details.
+    */}
     <DialogPrimitive.Content
       ref={ref}
       className={cn(

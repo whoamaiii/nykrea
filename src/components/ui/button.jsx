@@ -1,3 +1,29 @@
+/**
+ * Generic, theme-aware button component used across the dashboard UI.
+ *
+ * The implementation is intentionally thin; it delegates styling concerns to
+ *   1. `class-variance-authority` (CVA) – declarative variant definitions
+ *   2. `tailwind-merge` (through the local `cn` util) – merge conflict rules
+ *
+ * Supported variants (see `buttonVariants` below):
+ *   • variant: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"
+ *   • size:    "default" | "sm" | "lg" | "icon"
+ *
+ * Example
+ * ```jsx
+ * import { Button } from "../components/ui/button";
+ *
+ * <Button onClick={save} variant="secondary" size="sm">
+ *   Save changes
+ * </Button>
+ * ```
+ *
+ * Because the component forwards its ref and spreads `...props`, it behaves
+ * like a regular `<button>` element (or whatever is supplied via `asChild`).
+ * That makes it compatible with React-Aria, Radix primitives, and standard
+ * form behaviors out of the box.
+ */
+// ---------------------------------------------------------------------------
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva } from "class-variance-authority"
@@ -32,6 +58,10 @@ const buttonVariants = cva(
     },
   }
 )
+
+// The heavy lifting is done by `buttonVariants` – a function produced by CVA
+// that takes a prop map and returns an appropriate Tailwind class string. This
+// keeps the runtime component extremely small.
 
 const Button = React.forwardRef(({ className, variant, size, asChild = false, ...props }, ref) => {
   const Comp = asChild ? Slot : "button"
