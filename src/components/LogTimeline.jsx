@@ -14,8 +14,23 @@ function LogTimeline({ logs, onDeleteLog, onEditLog }) {
   // State for edit form data
   const [editFormData, setEditFormData] = useState({})
 
+  // Helper function to get timestamp from log (handles both old and new formats)
+  const getLogTimestamp = (log) => {
+    // If timestamp exists and is a number, use it
+    if (typeof log.timestamp === 'number') {
+      return log.timestamp;
+    }
+    // If timestamp exists and is a string, parse it
+    if (typeof log.timestamp === 'string') {
+      return new Date(log.timestamp).getTime();
+    }
+    // Fallback to id (for backward compatibility)
+    return typeof log.id === 'number' ? log.id : new Date(log.id).getTime();
+  }
+
   // Function to format timestamp relative to now
-  const formatTimestamp = (timestamp) => {
+  const formatTimestamp = (log) => {
+    const timestamp = getLogTimestamp(log);
     const date = new Date(timestamp)
     const now = new Date()
     const diffTime = Math.abs(now - date)
@@ -200,7 +215,7 @@ function LogTimeline({ logs, onDeleteLog, onEditLog }) {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-[var(--text-secondary)] whitespace-nowrap">
-                        {formatTimestamp(log.id)}
+                        {formatTimestamp(log)}
                       </span>
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                         <button

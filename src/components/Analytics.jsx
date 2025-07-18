@@ -13,10 +13,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 function Analytics({ logs, studentName, schedule }) {
   const [timeRange, setTimeRange] = useState(7);
 
+  // Helper function to get timestamp from log (handles both old and new formats)
+  const getLogTimestamp = (log) => {
+    // If timestamp exists and is a number, use it
+    if (typeof log.timestamp === 'number') {
+      return log.timestamp;
+    }
+    // If timestamp exists and is a string, parse it
+    if (typeof log.timestamp === 'string') {
+      return new Date(log.timestamp).getTime();
+    }
+    // Fallback to id (for backward compatibility)
+    return typeof log.id === 'number' ? log.id : new Date(log.id).getTime();
+  }
+
   const filteredLogs = useMemo(() => {
     if (timeRange === 'all') return logs;
     const startDate = startOfDay(subDays(new Date(), timeRange - 1));
-    return logs.filter(log => new Date(log.timestamp) >= startDate);
+    return logs.filter(log => new Date(getLogTimestamp(log)) >= startDate);
   }, [logs, timeRange]);
 
   const feelingsData = processFeelingsData(filteredLogs)

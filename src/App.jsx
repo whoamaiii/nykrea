@@ -153,11 +153,14 @@ function App() {
 
   // Function to delete a student
   const handleDeleteStudent = (studentId) => {
-    setStudents(prevStudents => prevStudents.filter(student => student.id !== studentId))
-    // If the deleted student was selected, select the first student
-    if (selectedStudentId === studentId) {
-      setSelectedStudentId(students[0]?.id || null)
-    }
+    setStudents(prevStudents => {
+      const updatedStudents = prevStudents.filter(student => student.id !== studentId);
+      // If the deleted student was selected, select the first student from the updated list
+      if (selectedStudentId === studentId) {
+        setSelectedStudentId(updatedStudents[0]?.id || null);
+      }
+      return updatedStudents;
+    });
   }
 
   // Function to edit a student's name
